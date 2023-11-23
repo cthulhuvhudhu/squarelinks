@@ -4,15 +4,15 @@
 package squarelinks
 
 class App {
-    val stageOne: String
-        get() {
-            val cut = SquareLinks()
-            repeat(5) { cut.newSquare() }
-            println("Is valid: ${cut.validate()}")
-            return cut.links.joinToString("")
-        }
+    internal val operator = Operator()
+
+    companion object {
+        var Zs: Int = 0
+    }
 }
 
 fun main() {
-    println(App().stageOne)
+    println("Enter how many zeros the hash must start with:")
+    App.Zs = readln().toInt()
+    App().operator.buildFive()
 }

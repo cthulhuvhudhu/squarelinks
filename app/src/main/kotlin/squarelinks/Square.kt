@@ -1,23 +1,26 @@
 package squarelinks
 
 import java.security.MessageDigest
+import kotlin.random.Random
 
 data class Square(
     internal val id: Int = 1,
     internal val pHash: String = "0") {
 
+    private var magic: Int = Random.nextInt()
     private val createdAt: Long = System.currentTimeMillis()
-    internal val hash = applySha256("$id$pHash$createdAt")
+    var hash = applyMagicHash()
 
     override fun toString(): String {
         return buildString {
-            append("Block:\n")
-            append("Id: $id\n")
-            append("Timestamp: $createdAt\n")
-            append("Hash of the previous block:\n")
-            append("$pHash\n")
-            append("Hash of the block:\n")
-            append("$hash\n")
+            appendLine("Block:")
+            appendLine("Id: $id")
+            appendLine("Timestamp: $createdAt")
+            appendLine("Magic number: $magic")
+            appendLine("Hash of the previous block:")
+            appendLine(pHash)
+            appendLine("Hash of the block:")
+            append(hash)
         }
     }
 
@@ -37,14 +40,30 @@ data class Square(
             throw RuntimeException(e)
         }
     }
+
+    private fun input() = "$id$pHash$createdAt$magic"
+
+    private fun applyMagicHash(): String {
+        var h = applySha256(input())
+
+        if (App.Zs > 0) {
+            while (h.take(App.Zs) != "0".repeat(App.Zs)) {
+                // Try new numbers
+                magic = Random.nextInt()
+                h = applySha256(input())
+            }
+        }
+        return h
+    }
 }
 
 class SquareLinks {
-    val links = ArrayDeque<Square>()
+    private val links = ArrayDeque<Square>()
 
-    fun newSquare() {
+    internal fun newSquare() {
         val pHash = links.lastOrNull()?.hash ?: "0"
         val sq = Square(getId(), pHash)
+        println(sq)
         links.add(sq)
     }
 
@@ -64,11 +83,10 @@ class SquareLinks {
     }
 
     companion object Properties {
-        var nextId = 1
+        private var nextId = 1
         fun getId(): Int {
             nextId++
             return --nextId
         }
     }
-
 }
