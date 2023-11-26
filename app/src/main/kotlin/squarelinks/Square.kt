@@ -62,8 +62,7 @@ class SquareLinks {
 
     internal fun newSquare() {
         val pHash = links.lastOrNull()?.hash ?: "0"
-        val sq = Square(getId(), pHash)
-        println(sq)
+        val sq = measureTimeS { Square(getId(), pHash) }
         links.add(sq)
     }
 
@@ -81,12 +80,34 @@ class SquareLinks {
         }
         return valid
     }
+    private inline fun measureTimeS(block: () -> Square): Square {
+        val startTime = System.currentTimeMillis()
+        val s = block()
+        val t = (System.currentTimeMillis()-startTime)/1000
+        println(s)
+        println("Block was generating for $t seconds")
+        adjustN(t)
+        return s
+    }
+
+    private fun adjustN(time: Long) {
+        if (time < 15) {
+            App.Zs++
+            println("N was increased to ${App.Zs}")
+        } else if (time > 45) {
+            App.Zs--
+            println("N was decreased to ${App.Zs}")
+        } else {
+            println("N stays the same")
+        }
+    }
 
     companion object Properties {
         private var nextId = 1
         fun getId(): Int {
+            val i = nextId
             nextId++
-            return --nextId
+            return i
         }
     }
 }

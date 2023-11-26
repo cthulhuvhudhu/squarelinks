@@ -4,18 +4,13 @@ class Operator {
 
     private lateinit var cut: SquareLinks
 
+    // Client should have retry logic
     fun buildFive() {
         cut = SquareLinks()
         repeat(NUM_SQ) {
-            println("Block was generating for ${measureTimeS(cut::newSquare)} seconds")
+            cut.newSquare()
         }
         println("Is valid: ${cut.validate()}")
-    }
-
-    private inline fun measureTimeS(block: () -> Unit): Long {
-        val startTime = System.currentTimeMillis()
-        block()
-        return (System.currentTimeMillis()-startTime)/1000
     }
 
     companion object Properties {
