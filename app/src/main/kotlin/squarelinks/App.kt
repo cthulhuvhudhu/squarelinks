@@ -14,5 +14,5 @@ class App {
 fun main() {
     println("Enter how many zeros the hash must start with:")
     App.Zs = readln().toInt()
-    App().operator.buildFive()
+    App().operator.mining()
 }
