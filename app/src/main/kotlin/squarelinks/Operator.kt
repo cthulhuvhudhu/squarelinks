@@ -4,7 +4,6 @@ import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-
 class Operator {
 
     private val cut = SquareLinks()
@@ -29,13 +28,18 @@ class Operator {
     }
 
     private fun exec(name: String) = run {
-        val result = cut.offerSquare(Random.nextInt())
+        val seconds = (System.currentTimeMillis()-startTime)/1000
+        val rInt = Random.nextInt()
+        val result = cut.offerSquare(rInt, trivia(rInt % 100 ) )
         if (result != null) {
             println("Miner $name")
             println(result)
-            val seconds = (System.currentTimeMillis()-startTime)/1000
             cut.adjustN(seconds)
             startTime = System.currentTimeMillis()
         }
+    }
+
+    private fun trivia(num: Int): String {
+        return khttp.get("http://numbersapi.com/$num?json").jsonObject.getString("text")
     }
 }

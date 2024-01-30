@@ -6,7 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 internal data class Square(
     private val magic: Int,
-    val pHash: String) {
+    val pHash: String,
+    private val message: String) {
 
     val id: Int = SquareLinks.getId().toInt()
     private val createdAt: Long = System.currentTimeMillis()
@@ -19,6 +20,7 @@ internal data class Square(
             appendLine("\tHash of the previous block: $pHash")
             appendLine("\tMagic number: $magic")
             appendLine("\tTimestamp: $createdAt")
+            appendLine("\tMessage:\n$message")
             append("\tHash of the block: $hash")
         }
     }
@@ -48,8 +50,8 @@ class SquareLinks {
         return links.peekLast()?.hash ?: "0"
     }
 
-    internal fun offerSquare(magic: Int): Square? {
-        val sq = Square(magic, getTailHash())
+    internal fun offerSquare(magic: Int, message: String): Square? {
+        val sq = Square(magic, getTailHash(), message)
         if (squareIsSuccess(sq)) { return sq }
         return null
     }
