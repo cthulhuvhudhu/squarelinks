@@ -29,6 +29,7 @@ dependencies {
     // This dependency is used by the application.
     implementation("com.google.guava:guava:32.0.0-android")
     implementation("org.danilopianini:khttp:1.4.3")
+    implementation("io.insert-koin:koin-core:3.5.0")
 }
 
 application {

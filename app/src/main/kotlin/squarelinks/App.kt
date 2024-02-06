@@ -3,16 +3,39 @@
  */
 package squarelinks
 
+import org.koin.core.context.GlobalContext.startKoin
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.module
+import squarelinks.model.SquareLinks
+import squarelinks.service.CryptoService
+import squarelinks.service.KeyService
+import squarelinks.service.MsgManager
+import squarelinks.service.SignatureService
+
 class App {
-    internal val operator = Operator()
 
     companion object {
-        var Zs: Int = 0
+        var NUM_Zs: Int = 0
+        const val ALGORITHM = "RSA"
     }
 }
 
+val appModule = module {
+    single<KeyService> { KeyService(1024) }
+    single<CryptoService> { CryptoService() }
+    singleOf(::SignatureService)
+    singleOf(::Operator)
+    singleOf(::SquareLinks)
+    singleOf(::MsgManager)
+}
+
 fun main() {
+    startKoin {
+        modules(appModule)
+    }
+
     println("Enter how many zeros the hash must start with:")
-    App.Zs = readln().toInt()
-    App().operator.mining()
+    App.NUM_Zs = readln().toInt()
+
+    Operator().mining()
 }

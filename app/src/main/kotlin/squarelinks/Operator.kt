@@ -1,12 +1,18 @@
 package squarelinks
 
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import squarelinks.model.SquareLinks
+import squarelinks.service.MsgManager
 import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-class Operator {
+class Operator : KoinComponent {
 
-    private val cut = SquareLinks()
+    private val msgMan : MsgManager by inject()
+    private val sqLinks : SquareLinks by inject()
+
     private var startTime by Delegates.notNull<Long>()
 
     fun mining() {
@@ -14,8 +20,7 @@ class Operator {
         while (SquareLinks.getId().toInt() <= 5) {
             threadPool()
         }
-
-        println("Is valid SquareLinks: ${cut.validate()}")
+        println("Is valid SquareLinks: ${sqLinks.validate()}")
     }
 
     private fun threadPool() {
@@ -28,18 +33,13 @@ class Operator {
     }
 
     private fun exec(name: String) = run {
-        val seconds = (System.currentTimeMillis()-startTime)/1000
+        val seconds = (System.currentTimeMillis() - startTime) / 1000
         val rInt = Random.nextInt()
-        val result = cut.offerSquare(rInt, trivia(rInt % 100 ) )
+        val result = sqLinks.offerSquare(rInt, msgMan.buildData())
         if (result != null) {
-            println("Miner $name")
-            println(result)
-            cut.adjustN(seconds)
+            println("Block:\nCreated by miner # $name\n${result}")
+            sqLinks.adjustN(seconds)
             startTime = System.currentTimeMillis()
         }
-    }
-
-    private fun trivia(num: Int): String {
-        return khttp.get("http://numbersapi.com/$num?json").jsonObject.getString("text")
     }
 }
