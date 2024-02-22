@@ -18,7 +18,7 @@ import java.security.spec.X509EncodedKeySpec
 class KeyService @Throws(NoSuchAlgorithmException::class, NoSuchProviderException::class) constructor(keyLength: Int) {
 
     private var keyGen: KeyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM)
-    private var pair: KeyPair
+    private val pair: KeyPair
 
     init {
         keyGen.initialize(keyLength)
@@ -34,7 +34,7 @@ class KeyService @Throws(NoSuchAlgorithmException::class, NoSuchProviderExceptio
     }
 
     private fun readPrivateKey(filename: String?): PrivateKey {
-        val path = filename?: "$DEFAULT_DIR$PRIVKEY_NAME"
+        val path = filename ?: "$DEFAULT_DIR$PRIVKEY_NAME"
         val keyBytes = Files.readAllBytes(File(path).toPath())
         val spec = PKCS8EncodedKeySpec(keyBytes)
         val kf = KeyFactory.getInstance(ALGORITHM)
@@ -42,7 +42,7 @@ class KeyService @Throws(NoSuchAlgorithmException::class, NoSuchProviderExceptio
     }
 
     private fun readPublicKey(filename: String?): PublicKey {
-        val path = filename?: "$DEFAULT_DIR$PUBKEY_NAME"
+        val path = filename ?: "$DEFAULT_DIR$PUBKEY_NAME"
         val keyBytes = Files.readAllBytes(File(path).toPath())
         val spec = X509EncodedKeySpec(keyBytes)
         val kf = KeyFactory.getInstance(ALGORITHM)
@@ -62,7 +62,7 @@ class KeyService @Throws(NoSuchAlgorithmException::class, NoSuchProviderExceptio
     }
 
     fun writeToDir(dir: String?) {
-        val parent = dir?: DEFAULT_DIR
+        val parent = dir ?: DEFAULT_DIR
         writeKeys("${parent}${PUBKEY_NAME}", pair.public.encoded)
         writeKeys("${parent}${PRIVKEY_NAME}", pair.private.encoded)
     }

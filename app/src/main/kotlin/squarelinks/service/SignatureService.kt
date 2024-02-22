@@ -17,7 +17,7 @@ class SignatureService {
         val sig = Signature.getInstance(ALGORITHM)
         sig.initVerify(key)
         sig.update(msg)
-        assert (sig.verify(signature)) { "Unable to validate signature" }
+        assert(sig.verify(signature)) { "Unable to validate signature" }
     }
 
     companion object {
