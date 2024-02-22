@@ -4,21 +4,23 @@ import squarelinks.App.Companion.ALGORITHM
 import java.security.PrivateKey
 import java.security.PublicKey
 import javax.crypto.Cipher
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
+import java.util.Base64
 
-@OptIn(ExperimentalEncodingApi::class)
 class CryptoService {
 
-    private var cipher: Cipher = Cipher.getInstance(ALGORITHM)
+    private val cipher: Cipher = Cipher.getInstance(ALGORITHM)
 
-    fun encrypt(msg: String, privateKey: PrivateKey): String {
-        cipher.init(Cipher.ENCRYPT_MODE, privateKey)
-        return Base64.encodeToByteArray(cipher.doFinal(msg.toByteArray())).toString()
+    fun encrypt(msg: String, publicKey: PublicKey): String {
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey)
+        val encryptedBytes = cipher.doFinal(msg.toByteArray())
+        val encodedBytes = Base64.getEncoder().encode(encryptedBytes)
+        return String(encodedBytes)
     }
 
-    fun decrypt(msg: String, publicKey: PublicKey): String {
-        cipher.init(Cipher.DECRYPT_MODE, publicKey)
-        return cipher.doFinal(Base64.decode(msg.toByteArray())).toString()
+    fun decrypt(msg: String, privateKey: PrivateKey): String {
+        cipher.init(Cipher.DECRYPT_MODE, privateKey)
+        val encryptedBytes = cipher.doFinal(msg.toByteArray())
+        val encodedBytes = Base64.getDecoder().decode(encryptedBytes)
+        return String(encodedBytes)
     }
 }

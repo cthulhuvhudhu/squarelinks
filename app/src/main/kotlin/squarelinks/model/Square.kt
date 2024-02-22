@@ -1,25 +1,36 @@
 package squarelinks.model
 
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import java.security.MessageDigest
 
 internal data class Square(
-    val magic: Int,
+    val magic: UInt,
     val pHash: String,
-    val data: List<ByteArray>) {
+    internal val creator: String,
+) {
 
-    val id: Int = SquareLinks.getId().toInt()
+    val id: Int = SquareLinks.getId()
     private val createdAt: Long = System.currentTimeMillis()
-    private val input = "$id$pHash$createdAt$magic"
-    val hash = applySha256(input)
+    internal val hash = applySha256("$id$pHash$createdAt$magic")
+    internal var data: List<List<ByteArray>> = emptyList()
 
     override fun toString(): String {
         return buildString {
-            appendLine("Block: $id")
-            appendLine("\tHash of the previous block: $pHash")
-            appendLine("\tMagic number: $magic")
+            appendLine("Block:")
+            appendLine("Created by: $creator")
+//            appendLine("$creator gets $REWARD VC")
+            appendLine("Id: $id")
             appendLine("\tTimestamp: $createdAt")
-            appendLine("\tMessage: ${String(data[0])}")
-            append("\tHash of the block: $hash")
+            appendLine("\tMagic number: $magic")
+            appendLine("\tHash of the previous block: \n$pHash")
+            appendLine("\tHash of the block: \n$hash")
+            val output = if (data.first().isEmpty()) {
+                "No transactions/messages"
+            } else {
+                "\n${data.map { String(it.first()) }}"
+            }
+            append("\tBlock data: \n$output")
         }
     }
 
@@ -39,4 +50,8 @@ internal data class Square(
             throw RuntimeException(e)
         }
     }
+
+//    internal fun getTransactions(): Array<Transaction> {
+//        return Json.decodeFromString<Array<Transaction>>(String(data.first()))
+//    }
 }
