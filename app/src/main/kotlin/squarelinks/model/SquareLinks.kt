@@ -51,8 +51,7 @@ class SquareLinks : KoinComponent {
     private fun squareIsSuccess(sq: Square): Boolean {
         val pHash = getTailHash()
         if ((pHash == sq.pHash) && (sq.hash.take(NUM_Zs.value) == "0".repeat(NUM_Zs.value))
-            && (sq.id == getId())
-//                && validateTransactions(sq)
+            && validateTransactions(sq)
         ) {
             log.debug { "Candidate ${sq.id} passes checks" }
             sq.data = captureMessages()
@@ -65,15 +64,15 @@ class SquareLinks : KoinComponent {
         return false
     }
 
-//    private fun validateTransactions(sq: Square): Boolean {
-//        try {
-//            Ledger(links).process(sq)
-//            return true
-//        } catch (e: AssertionError) {
-//            println("Invalid transactions, discarding")
-//            return false
-//        }
-//    }
+    private fun validateTransactions(sq: Square): Boolean {
+        try {
+            Ledger(links).process(sq)
+            return true
+        } catch (e: AssertionError) {
+            println("Invalid transactions, discarding")
+            return false
+        }
+    }
 
     internal fun validate(): Boolean {
         var valid = true
@@ -128,7 +127,7 @@ class SquareLinks : KoinComponent {
             return nextId.value
         }
 
-//        internal const val START_COINS = 100
-//        internal const val REWARD = 100
+        internal const val START_COINS = 100
+        internal const val REWARD = 100
     }
 }

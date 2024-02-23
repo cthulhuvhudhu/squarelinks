@@ -3,6 +3,8 @@ package squarelinks
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import java.util.concurrent.Executors
 import kotlin.concurrent.thread
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.random.nextUInt
 import kotlinx.atomicfu.update
@@ -10,7 +12,6 @@ import kotlinx.coroutines.*
 import mu.KotlinLogging
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.java.KoinJavaComponent.get
 
 import squarelinks.model.SquareLinks
 import squarelinks.service.MsgManager
@@ -19,18 +20,16 @@ import squarelinks.App.Companion.NUM_MINERS
 import squarelinks.App.Companion.NUM_Zs
 import squarelinks.model.Result
 import squarelinks.model.Strategy
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 class Operator : KoinComponent {
 
-    private val msgMan = get<MsgManager>(MsgManager::class.java)
+    private val msgMan: MsgManager by inject()
     private val sqLinks: SquareLinks by inject()
 
-    private val log = KotlinLogging.logger {} // tODO?
+    private val log = KotlinLogging.logger {}
 
-    private var sqGenStartTime = System.currentTimeMillis() // tODO Race condition? Consider Channel
-    private var histogram = Array<List<Double>>(9) { emptyList() } // TODO don't like this, need to replace w channel
+    private var sqGenStartTime = System.currentTimeMillis()
+    private var histogram = Array<List<Double>>(9) { emptyList() }
     private var results = mutableListOf<Result>()
     private var initNumZs = App.NUM_Zs.value
 
@@ -98,17 +97,19 @@ class Operator : KoinComponent {
     }
 
     private fun mine() = run {
-        val name = "miner # ${Random.nextInt(NUM_MINERS) + 1}"
+        val name = "miner${Random.nextInt(NUM_MINERS) + 1}"
         Thread.currentThread().name = name
         val seconds = ((System.currentTimeMillis() - sqGenStartTime) / 1000).toDouble()
         val rUInt = Random.nextUInt()
-        val isSuccess = sqLinks.offerSquare(rUInt, name)
-        if (isSuccess) {
-            sqReset(seconds)
-            sqLinks.evaluateRuntime(seconds.toInt())
+        synchronized(this) {
+            val isSuccess = sqLinks.offerSquare(rUInt, name)
+            if (isSuccess) {
+                sqReset(seconds)
+                sqLinks.evaluateRuntime(seconds.toInt())
+            }
         }
         if (Random.nextInt(NUM_Zs.value.scale()) == 0 && !sqLinks.isEmpty()) {
-            sqLinks.submitMessage(msgMan.buildMessageData())
+            sqLinks.submitMessage(msgMan.buildTxData())
         }
     }
 
@@ -118,7 +119,7 @@ class Operator : KoinComponent {
 
     private fun resetPerStrategy() {
         sqLinks.reset()
-        histogram = Array(9) { emptyList() } // TODO Move out of class level
+        histogram = Array(9) { emptyList() }
         NUM_Zs.update { initNumZs }
     }
 

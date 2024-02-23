@@ -21,6 +21,7 @@ import squarelinks.service.CryptoService
 import squarelinks.service.KeyService
 import squarelinks.service.MsgManager
 import squarelinks.service.SignatureService
+import squarelinks.service.TransactionGenerator
 import kotlin.properties.Delegates
 import kotlin.system.exitProcess
 
@@ -36,7 +37,6 @@ class App {
     }
 }
 
-// TODO convert to annotations
 val appModule = module {
     single<KeyService> { KeyService(1024) }
     singleOf(::CryptoService)
@@ -44,10 +44,9 @@ val appModule = module {
     singleOf(::Operator)
     singleOf(::SignatureService)
     singleOf(::SquareLinks)
-//    singleOf(::TransactionGenerator)
+    singleOf(::TransactionGenerator)
 }
 
-// TODO Better way to do this, with get Logger
 private val log = KotlinLogging.logger {}
 
 fun main(args: Array<String>) {
@@ -55,22 +54,41 @@ fun main(args: Array<String>) {
         modules(appModule)
     }
     val parser = ArgParser("squarelinks")
-    val numSquares by parser.option(ArgType.Int, shortName = "sq", description = "Number of square to output")
+    val numSquares by parser.option(
+        ArgType.Int,
+        shortName = "sq",
+        description = "Number of square to output")
         .default(7)
-    val threads by parser.option(ArgType.Int, fullName = "threads", shortName = "t", description = "Number of threads")
+    val threads by parser.option(
+        ArgType.Int,
+        fullName = "threads",
+        shortName = "t",
+        description = "Number of threads")
         .default(50)
     val freezeN by parser.option(
         ArgType.Boolean,
         shortName = "f",
         description = "Freeze N to skip adjustments based on time to completion"
     ).default(false)
-    val capN by parser.option(ArgType.Int, shortName = "cap", description = "Sets a cap of maximum value for N")
+    val capN by parser.option(
+        ArgType.Int,
+        shortName = "cap",
+        description = "Sets a cap of maximum value for N")
         .default(5)
-    val verbose by parser.option(ArgType.Boolean, shortName = "v", description = "Turn on debug logging")
+    val verbose by parser.option(
+        ArgType.Boolean,
+        shortName = "v",
+        description = "Turn on debug logging")
         .default(false)
-    val startZ by parser.option(ArgType.Int, shortName = "z", description = "Sets initial value for N")
+    val startZ by parser.option(
+        ArgType.Int,
+        shortName = "z",
+        description = "Sets initial value for N")
         .default(2)
-    val reps by parser.option(ArgType.Int, shortName = "r", description = "How many times to repeat the runs")
+    val reps by parser.option(
+        ArgType.Int,
+        shortName = "r",
+        description = "How many times to repeat the runs")
         .default(1)
     val strategies by parser.option(
         ArgType.String,

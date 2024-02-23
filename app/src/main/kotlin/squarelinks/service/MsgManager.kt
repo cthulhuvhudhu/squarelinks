@@ -1,6 +1,8 @@
 package squarelinks.service
 
 import com.google.common.primitives.Ints
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import squarelinks.App.Companion.NUM_MINERS
@@ -10,27 +12,27 @@ class MsgManager : KoinComponent {
 
     private val keySvc: KeyService by inject()
     private val sigSvc: SignatureService by inject()
-//    private val txGen: TransactionGenerator by inject()
+    private val txGen: TransactionGenerator by inject()
 
     private val triviaList: List<String> = (1..NUM_TRIVIA).map { it.toString() }
         .map { khttp.get("$TRIVIA_URL$it?json").jsonObject.getString("text") }
         .map { it.slice(0..Ints.min(CARRIAGE_RETURN_LEN, it.length - 1)) + "..." }
 
+    // Chat messages implementation
     fun buildMessageData(): List<ByteArray> {
         val msg = triviaList[Random.nextInt(NUM_TRIVIA)].toByteArray()
         val sign = sigSvc.sign(msg, keySvc.getPrivateKey())
         return listOf(msg, sign)
     }
 
-//    private fun buildTxData(msg: List<Transaction>): List<ByteArray> {
-//        val data = Json.encodeToString(msg).toByteArray()
-//        val sign = sigSvc.sign(data, keySvc.getPrivateKey())
-//        return listOf(data, sign)
-//    }
+    // Crypto ledger implementation
+    internal fun buildTxData(): List<ByteArray> {
+        val msg = txGen.unsafeGenerate()
+        val data = Json.encodeToString(msg).toByteArray()
+        val sign = sigSvc.sign(data, keySvc.getPrivateKey())
+        return listOf(data, sign)
+    }
 
-//    fun buildTxData(): List<ByteArray> {
-//        return buildTxData(listOf(txGen.unsafeGenerate()))
-//    }
     fun validateData(vararg data: List<ByteArray>) {
         data.forEach { sigSvc.verify(it.first(), it.last(), keySvc.getPublicKey()) }
     }

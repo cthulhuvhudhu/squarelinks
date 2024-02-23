@@ -1,7 +1,6 @@
 package squarelinks.model
 
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import squarelinks.model.SquareLinks.Properties.REWARD
 import java.security.MessageDigest
 
 internal data class Square(
@@ -19,18 +18,22 @@ internal data class Square(
         return buildString {
             appendLine("Block:")
             appendLine("Created by: $creator")
-//            appendLine("$creator gets $REWARD VC")
+            appendLine("$creator gets $REWARD VC")
             appendLine("Id: $id")
             appendLine("\tTimestamp: $createdAt")
             appendLine("\tMagic number: $magic")
             appendLine("\tHash of the previous block: \n$pHash")
             appendLine("\tHash of the block: \n$hash")
-            val output = if (data.first().isEmpty()) {
+            val output = if (data.isEmpty()) {
                 "No transactions/messages"
             } else {
-                "\n${data.map { String(it.first()) }}"
+                "\n${
+                    data.joinToString("\n") { e ->
+                        Transaction.decode(e.first()).toString()
+                    }
+                }"
             }
-            append("\tBlock data: \n$output")
+            append("\tBlock data: $output")
         }
     }
 
@@ -51,7 +54,9 @@ internal data class Square(
         }
     }
 
-//    internal fun getTransactions(): Array<Transaction> {
-//        return Json.decodeFromString<Array<Transaction>>(String(data.first()))
-//    }
+    internal fun getTransactions(): Array<Transaction> {
+        return data.map { e -> e.first() }
+            .map { Transaction.decode(it) }
+            .toTypedArray()
+    }
 }
